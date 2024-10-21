@@ -1,0 +1,105 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  name           String?
+  hashedPassword String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  purchases      Purchase[]
+  reminders      Reminder[]
+
+  @@map("user")
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  type              String
+  provider          String
+  providerAccountId String
+  token_type        String?
+  refresh_token     String?
+  access_token      String?
+  id_token          String?
+  scope             String?
+  session_state     String?
+  expires_at        Int?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@unique([provider, providerAccountId])
+  @@map("account")
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())  // Changed id to Int
+  sessionToken String   @unique
+  userId       Int      // Changed userId to Int to match User model
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         Int      @id @default(autoincrement())  // Added id field for better management
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Purchase {
+  id            Int       @id @default(autoincrement())
+  description   String?
+  amount        Float
+  purchase_date DateTime
+  user_id       Int
+  plan_id       Int
+  user          User      @relation(fields: [user_id], references: [id])
+  plan          PaymentPlan @relation(fields: [plan_id], references: [id])
+  payments      Payment[]
+  reminders     Reminder[]
+}
+
+model Reminder {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  purchase_id   Int
+  reminder_date DateTime
+  status        String
+  user          User      @relation(fields: [user_id], references: [id])
+  purchase      Purchase  @relation(fields: [purchase_id], references: [id])
+}
+
+model PaymentPlan {
+  id                     Int       @id @default(autoincrement())
+  name                   String
+  total_duration_in_months Int
+  payment_frequency       String
+  interest_rate           Float?
+  purchases               Purchase[]
+}
+
+model Payment {
+  id               Int      @id @default(autoincrement())
+  purchase_id      Int
+  payment_date     DateTime
+  amount_paid      Float
+  remaining_balance Float
+  purchase         Purchase @relation(fields: [purchase_id], references: [id])
+}
