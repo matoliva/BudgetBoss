@@ -1,32 +1,30 @@
-'use client';
+'use client'
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { SessionProvider } from 'next-auth/react'
+import {ThemeProvider} from '@/components/theme-provider'
+import {SessionProvider} from 'next-auth/react'
 
-import { ModeToggle } from "@/components/ui/ModeToggle";
+import {ModeToggle} from '@/components/ui/ModeToggle'
 
-import "./globals.css";
+import './globals.css'
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
-      
-      <body
-      >
+      <body>
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ModeToggle />
-            <SessionProvider>{children}</SessionProvider>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ModeToggle />
+          <SessionProvider>{children}</SessionProvider>
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
